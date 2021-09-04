@@ -1,6 +1,4 @@
-use bracket_lib::prelude::*;
-
-use crate::domain::*;
+use crate::prelude::*;
 
 pub struct Map {
     tiles: Vec<TileType>,
@@ -15,22 +13,36 @@ impl Map {
         let mut info = vec![];
         for y in 0..SCREEN_HEIGHT {
             for x in 0..SCREEN_WIDTH {
-                let idx = map_idx(x, y);
-                match self.tiles[idx] {
-                    TileType::Floor => info.push((x, y, YELLOW, BLACK, to_cp437('.'))),
-                    TileType::Wall => info.push((x, y, GREEN, BLACK, to_cp437('#'))),
+                if let Some(tile) = self.tile(Point::new(x, y)) {
+                    match tile {
+                        TileType::Floor => info.push((x, y, YELLOW, BLACK, to_cp437('.'))),
+                        TileType::Wall => info.push((x, y, GREEN, BLACK, to_cp437('#'))),
+                    }
                 }
             }
         }
         info
     }
+
+    pub fn can_enter_tile(&self, point: Point) -> bool {
+        if let Some(tile) = self.tile(point) {
+            tile == TileType::Floor
+        } else {
+            false
+        }
+    }
+
+    fn tile(&self, point: Point) -> Option<TileType> {
+        let idx = ((point.y * SCREEN_WIDTH) + point.x) as usize;
+        if let Some(tile) = self.tiles.get(idx) {
+            Some(*tile)
+        } else {
+            None
+        }
+    }
 }
 
-fn map_idx(x: i32, y: i32) -> usize {
-    ((y * SCREEN_WIDTH) + x) as usize
-}
-
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum TileType {
     Floor,
     Wall,

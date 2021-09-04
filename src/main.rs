@@ -1,9 +1,14 @@
 #![warn(clippy::all, clippy::pedantic)]
 
-use bracket_lib::prelude::*;
-
 mod controller;
 mod domain;
+mod prelude {
+    pub use bracket_lib::prelude::*;
+
+    pub use crate::domain::*;
+}
+
+use crate::prelude::*;
 
 fn main() -> BError {
     let ctx = BTermBuilder::simple80x50()
