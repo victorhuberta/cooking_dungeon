@@ -18,14 +18,15 @@ impl GameState for State {
 
 impl State {
     pub fn new() -> Self {
+        let mut rng = RandomNumberGenerator::new();
+        let mb = MapBuilder::new(&mut rng);
         Self {
-            map: Map::new(vec![TileType::Floor; MAP_TILES_N]),
-            player: Player::new(Point::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)),
+            map: mb.map_clone(),
+            player: Player::new(mb.player_start()),
         }
     }
 
-    fn render(&mut self, ctx: &mut BTerm, info: RenderInfo) {
-        let (x, y, fg, bg, symbol) = info;
-        ctx.set(x, y, fg, bg, symbol);
+    fn render(&mut self, ctx: &mut BTerm, ri: RenderInfo) {
+        ctx.set(ri.x, ri.y, ri.fg, ri.bg, ri.glyph);
     }
 }

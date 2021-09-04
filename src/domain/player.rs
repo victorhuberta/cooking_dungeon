@@ -26,12 +26,12 @@ impl Player {
     }
 
     pub fn render_info(&self) -> RenderInfo {
-        (
-            self.position.x,
-            self.position.y,
-            WHITE,
-            BLACK,
-            to_cp437('@'),
-        )
+        RenderInfo {
+            x: self.position.x,
+            y: self.position.y,
+            fg: WHITE,
+            bg: BLACK,
+            glyph: to_cp437('@'),
+        }
     }
 }
