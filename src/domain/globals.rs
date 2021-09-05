@@ -8,7 +8,7 @@ pub const NUM_ROOMS: usize = 20;
 pub struct RenderInfo {
     pub x: i32,
     pub y: i32,
-    pub fg: (u8, u8, u8),
-    pub bg: (u8, u8, u8),
+    pub fg: (u8, u8, u8), // if you use dungeonfont, must be WHITE
+    pub bg: (u8, u8, u8), // if you use dungeonfont, must be BLACK
     pub glyph: u16,
 }
