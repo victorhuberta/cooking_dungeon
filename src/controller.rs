@@ -3,16 +3,24 @@ use crate::prelude::*;
 pub struct State {
     map: Map,
     player: Player,
+    camera: Camera,
 }
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
+        ctx.set_active_console(0);
         ctx.cls();
-        self.player.update(ctx.key, &self.map);
-        for tile in self.map.render_info() {
+        ctx.set_active_console(1);
+        ctx.cls();
+
+        self.player.update(ctx.key, &self.map, &mut self.camera);
+
+        ctx.set_active_console(0);
+        for tile in self.map.render_info(&self.camera) {
             render(ctx, tile);
         }
-        render(ctx, self.player.render_info());
+        ctx.set_active_console(1);
+        render(ctx, self.player.render_info(&mut self.camera));
     }
 }
 
@@ -23,6 +31,7 @@ impl State {
         Self {
             map: mb.map_clone(),
             player: Player::new(mb.player_start()),
+            camera: Camera::new(mb.player_start()),
         }
     }
 }

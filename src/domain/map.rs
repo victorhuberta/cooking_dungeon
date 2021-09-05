@@ -11,7 +11,7 @@ pub struct MapBuilder {
 impl MapBuilder {
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
         let mut mb = Self {
-            map: Map::new(SCREEN_WIDTH, SCREEN_HEIGHT),
+            map: Map::new(WORLD_WIDTH, WORLD_HEIGHT),
             rooms: Vec::new(),
             player_start: Point::zero(),
         };
@@ -112,23 +112,23 @@ impl Map {
         }
     }
 
-    pub fn render_info(&self) -> Vec<RenderInfo> {
+    pub fn render_info(&self, camera: &Camera) -> Vec<RenderInfo> {
         let mut info = Vec::new();
-        for y in 0..self.height {
-            for x in 0..self.width {
+        for y in camera.top()..=camera.bottom() {
+            for x in camera.left()..=camera.right() {
                 if let Some(tile) = self.tile(Point::new(x, y)) {
                     match tile {
                         TileType::Floor => info.push(RenderInfo {
-                            x,
-                            y,
-                            fg: BLACK,
-                            bg: BROWN2,
+                            x: x - camera.left(),
+                            y: y - camera.top(),
+                            fg: WHITE,
+                            bg: BLACK,
                             glyph: to_cp437('.'),
                         }),
                         TileType::Wall => info.push(RenderInfo {
-                            x,
-                            y,
-                            fg: BLACK,
+                            x: x - camera.left(),
+                            y: y - camera.top(),
+                            fg: WHITE,
                             bg: BLACK,
                             glyph: to_cp437('#'),
                         }),

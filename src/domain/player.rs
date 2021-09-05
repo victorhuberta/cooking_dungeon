@@ -9,7 +9,7 @@ impl Player {
         Self { position }
     }
 
-    pub fn update(&mut self, key: Option<VirtualKeyCode>, map: &Map) {
+    pub fn update(&mut self, key: Option<VirtualKeyCode>, map: &Map, camera: &mut Camera) {
         if let Some(key) = key {
             let delta = match key {
                 VirtualKeyCode::Left => Point::new(-1, 0),
@@ -21,14 +21,15 @@ impl Player {
             let new_position = self.position + delta;
             if map.can_enter_tile(new_position) {
                 self.position = new_position;
+                camera.on_player_move(new_position);
             }
         }
     }
 
-    pub fn render_info(&self) -> RenderInfo {
+    pub fn render_info(&self, camera: &mut Camera) -> RenderInfo {
         RenderInfo {
-            x: self.position.x,
-            y: self.position.y,
+            x: self.position.x - camera.left(),
+            y: self.position.y - camera.top(),
             fg: WHITE,
             bg: BLACK,
             glyph: to_cp437('@'),
