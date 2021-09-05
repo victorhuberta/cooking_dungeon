@@ -10,9 +10,9 @@ impl GameState for State {
         ctx.cls();
         self.player.update(ctx.key, &self.map);
         for tile in self.map.render_info() {
-            self.render(ctx, tile);
+            render(ctx, tile);
         }
-        self.render(ctx, self.player.render_info());
+        render(ctx, self.player.render_info());
     }
 }
 
@@ -25,8 +25,8 @@ impl State {
             player: Player::new(mb.player_start()),
         }
     }
+}
 
-    fn render(&mut self, ctx: &mut BTerm, ri: RenderInfo) {
-        ctx.set(ri.x, ri.y, ri.fg, ri.bg, ri.glyph);
-    }
+fn render(ctx: &mut BTerm, ri: RenderInfo) {
+    ctx.set(ri.x, ri.y, ri.fg, ri.bg, ri.glyph);
 }

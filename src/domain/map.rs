@@ -1,3 +1,5 @@
+use std::cmp;
+
 use crate::prelude::*;
 
 pub struct MapBuilder {
@@ -15,6 +17,7 @@ impl MapBuilder {
         };
         mb.fill(TileType::Wall);
         mb.build_rooms(NUM_ROOMS, rng);
+        mb.build_corridors(rng);
         mb.player_start = mb.rooms[0].center();
         mb
     }
@@ -58,6 +61,39 @@ impl MapBuilder {
             }
         }
     }
+
+    fn build_corridors(&mut self, rng: &mut RandomNumberGenerator) {
+        let mut rooms = self.rooms.clone();
+        rooms.sort_by(|a, b| a.center().x.cmp(&b.center().x));
+
+        for (i, room) in rooms.iter().enumerate().skip(1) {
+            let prev = rooms[i - 1].center();
+            let curr = room.center();
+            if rng.range(0, 2) == 1 {
+                self.apply_horizontal_tunnel(prev.x, curr.x, prev.y);
+                self.apply_vertical_tunnel(prev.y, curr.y, curr.x);
+            } else {
+                self.apply_vertical_tunnel(prev.y, curr.y, prev.x);
+                self.apply_horizontal_tunnel(prev.x, curr.x, curr.y);
+            }
+        }
+    }
+
+    fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
+        for y in cmp::min(y1, y2)..=cmp::max(y1, y2) {
+            if let Some(idx) = self.map.idx(Point::new(x, y)) {
+                self.map.tiles[idx] = TileType::Floor;
+            }
+        }
+    }
+
+    fn apply_horizontal_tunnel(&mut self, x1: i32, x2: i32, y: i32) {
+        for x in cmp::min(x1, x2)..=cmp::max(x1, x2) {
+            if let Some(idx) = self.map.idx(Point::new(x, y)) {
+                self.map.tiles[idx] = TileType::Floor;
+            }
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -74,14 +110,6 @@ impl Map {
             height,
             tiles: vec![TileType::Floor; (width * height) as usize],
         }
-    }
-
-    pub fn width(&self) -> i32 {
-        self.width
-    }
-
-    pub fn height(&self) -> i32 {
-        self.height
     }
 
     pub fn render_info(&self) -> Vec<RenderInfo> {
