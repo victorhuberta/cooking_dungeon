@@ -140,19 +140,12 @@ impl Map {
     }
 
     pub fn can_enter_tile(&self, position: Point) -> bool {
-        if let Some(tile) = self.tile(position) {
-            *tile == TileType::Floor
-        } else {
-            false
-        }
+        self.tile(position)
+            .map_or(false, |tile| *tile == TileType::Floor)
     }
 
     fn tile(&self, position: Point) -> Option<&TileType> {
-        if let Some(idx) = self.idx(position) {
-            self.tiles.get(idx)
-        } else {
-            None
-        }
+        self.idx(position).and_then(|idx| self.tiles.get(idx))
     }
 
     // Return an index only if the position is in bounds.
