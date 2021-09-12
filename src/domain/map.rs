@@ -30,6 +30,10 @@ impl MapBuilder {
         self.player_start
     }
 
+    pub fn rooms(&self) -> &Vec<Rect> {
+        &self.rooms
+    }
+
     fn fill(&mut self, tile_type: TileType) {
         for idx in 0..self.map.tiles.len() {
             self.map.tiles[idx] = tile_type;
@@ -112,39 +116,12 @@ impl Map {
         }
     }
 
-    pub fn render_info(&self, camera: &Camera) -> Vec<RenderInfo> {
-        let mut info = Vec::new();
-        for y in camera.top()..=camera.bottom() {
-            for x in camera.left()..=camera.right() {
-                if let Some(tile) = self.tile(Point::new(x, y)) {
-                    match tile {
-                        TileType::Floor => info.push(RenderInfo {
-                            x: x - camera.left(),
-                            y: y - camera.top(),
-                            fg: WHITE,
-                            bg: BLACK,
-                            glyph: to_cp437('.'),
-                        }),
-                        TileType::Wall => info.push(RenderInfo {
-                            x: x - camera.left(),
-                            y: y - camera.top(),
-                            fg: WHITE,
-                            bg: BLACK,
-                            glyph: to_cp437('#'),
-                        }),
-                    }
-                }
-            }
-        }
-        info
-    }
-
     pub fn can_enter_tile(&self, position: Point) -> bool {
         self.tile(position)
             .map_or(false, |tile| *tile == TileType::Floor)
     }
 
-    fn tile(&self, position: Point) -> Option<&TileType> {
+    pub fn tile(&self, position: Point) -> Option<&TileType> {
         self.idx(position).and_then(|idx| self.tiles.get(idx))
     }
 

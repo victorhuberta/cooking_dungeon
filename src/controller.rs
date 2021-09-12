@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 pub struct State {
-    map: Map,
-    player: Player,
-    camera: Camera,
+    world: World,
+    resources: Resources,
+    systems: Schedule,
 }
 
 impl GameState for State {
@@ -13,14 +13,9 @@ impl GameState for State {
         ctx.set_active_console(1);
         ctx.cls();
 
-        self.player.update(ctx.key, &self.map, &mut self.camera);
-
-        ctx.set_active_console(0);
-        for tile in self.map.render_info(&self.camera) {
-            render(ctx, tile);
-        }
-        ctx.set_active_console(1);
-        render(ctx, self.player.render_info(&mut self.camera));
+        self.resources.insert(ctx.key);
+        self.systems.execute(&mut self.world, &mut self.resources);
+        render_draw_buffer(ctx).expect("Render error");
     }
 }
 
@@ -28,14 +23,19 @@ impl State {
     pub fn new() -> Self {
         let mut rng = RandomNumberGenerator::new();
         let mb = MapBuilder::new(&mut rng);
+
+        let mut world = World::default();
+        spawn_player(&mut world, mb.player_start());
+        spawn_random_enemies(&mut world, &mb, &mut rng);
+
+        let mut resources = Resources::default();
+        resources.insert(mb.map_clone());
+        resources.insert(Camera::new(mb.player_start()));
+
         Self {
-            map: mb.map_clone(),
-            player: Player::new(mb.player_start()),
-            camera: Camera::new(mb.player_start()),
+            world,
+            resources,
+            systems: build_scheduler(),
         }
     }
-}
-
-fn render(ctx: &mut BTerm, ri: RenderInfo) {
-    ctx.set(ri.x, ri.y, ri.fg, ri.bg, ri.glyph);
 }

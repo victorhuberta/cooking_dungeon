@@ -4,6 +4,8 @@ mod controller;
 mod domain;
 mod prelude {
     pub use bracket_lib::prelude::*;
+    pub use legion::world::SubWorld;
+    pub use legion::*;
 
     pub use crate::domain::*;
 }
