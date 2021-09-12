@@ -3,7 +3,9 @@ use crate::prelude::*;
 pub struct State {
     world: World,
     resources: Resources,
-    systems: Schedule,
+    input_systems: Schedule,
+    player_systems: Schedule,
+    enemy_systems: Schedule,
 }
 
 impl GameState for State {
@@ -14,7 +16,20 @@ impl GameState for State {
         ctx.cls();
 
         self.resources.insert(ctx.key);
-        self.systems.execute(&mut self.world, &mut self.resources);
+
+        let current_state = *self.resources.get::<TurnState>().unwrap();
+        match current_state {
+            TurnState::AwaitingInput => self
+                .input_systems
+                .execute(&mut self.world, &mut self.resources),
+            TurnState::PlayerTurn => self
+                .player_systems
+                .execute(&mut self.world, &mut self.resources),
+            TurnState::EnemyTurn => self
+                .enemy_systems
+                .execute(&mut self.world, &mut self.resources),
+        }
+
         render_draw_buffer(ctx).expect("Render error");
     }
 }
@@ -31,11 +46,14 @@ impl State {
         let mut resources = Resources::default();
         resources.insert(mb.map_clone());
         resources.insert(Camera::new(mb.player_start()));
+        resources.insert(TurnState::AwaitingInput);
 
         Self {
             world,
             resources,
-            systems: build_scheduler(),
+            input_systems: build_input_scheduler(),
+            player_systems: build_player_scheduler(),
+            enemy_systems: build_enemy_scheduler(),
         }
     }
 }

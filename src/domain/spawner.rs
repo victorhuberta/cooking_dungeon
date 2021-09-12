@@ -44,5 +44,6 @@ pub fn spawn_enemy(world: &mut World, position: Point, enemy_type: char) {
             color: ColorPair::new(WHITE, BLACK),
             glyph: to_cp437(enemy_type),
         },
+        MoveRandomly,
     ));
 }
