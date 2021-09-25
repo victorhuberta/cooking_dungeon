@@ -8,6 +8,10 @@ pub fn spawn_player(world: &mut World, position: Point) {
             color: ColorPair::new(WHITE, BLACK),
             glyph: to_cp437('@'),
         },
+        Health {
+            current: 20,
+            max: 20,
+        },
     ));
 }
 
@@ -23,20 +27,15 @@ pub fn spawn_random_enemies(
         .skip(1)
         .map(Rect::center)
         .for_each(|pos| {
-            spawn_enemy(
-                world,
-                pos,
-                match rng.range(0, 4) {
-                    0 => 'E',
-                    1 => 'O',
-                    2 => 'o',
-                    _ => 'g',
-                },
-            );
+            let (hp, name, enemy_type) = match rng.roll_dice(1, 10) {
+                1..=8 => goblin(),
+                _ => orc(),
+            };
+            spawn_enemy(world, pos, hp, name, enemy_type);
         });
 }
 
-pub fn spawn_enemy(world: &mut World, position: Point, enemy_type: char) {
+pub fn spawn_enemy(world: &mut World, position: Point, hp: i32, name: String, enemy_type: char) {
     world.push((
         Enemy,
         position,
@@ -45,5 +44,18 @@ pub fn spawn_enemy(world: &mut World, position: Point, enemy_type: char) {
             glyph: to_cp437(enemy_type),
         },
         MoveRandomly,
+        Health {
+            current: hp,
+            max: hp,
+        },
+        Name(name),
     ));
+}
+
+fn goblin() -> (i32, String, char) {
+    (1, "Goblin".to_string(), 'g')
+}
+
+fn orc() -> (i32, String, char) {
+    (2, "Orc".to_string(), 'o')
 }
